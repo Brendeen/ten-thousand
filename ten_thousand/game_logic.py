@@ -1,6 +1,47 @@
 import random
 
 
+def welcome():
+    print("""
+    Welcome to Ten Thousand
+    
+    (y)es to play or (q)uit to decline
+    """)
+    while True:
+        prompt = input("> ")
+        if prompt == "y":
+            game_round()
+            break
+        elif prompt == "q":
+            print("OK. Maybe another time")
+            break
+        else:
+            print(f"Sorry, {prompt} is not a valid answer, please type y or q.")
+
+
+def game_round():
+    round_num = 0
+    print(f"""Starting round {round_num}
+Rolling 6 dice...""")
+    print(GameLogic.roll_dice(6))
+    while True:
+        round_num += 1
+        print("Enter dice to keep, or (q)uit:")
+        prompt = input("> ")
+        if prompt == "123456":
+            calc_score()
+        elif prompt == "q":
+            print("Thanks for playing. You earned 0 points")
+            break
+
+
+def calc_score(roll):
+    pass
+    print()
+# this function will calculate a users score if they
+# choose to bank any dice.
+
+
 class GameLogic:
 
     @staticmethod
@@ -86,4 +127,4 @@ class GameLogic:
 
 
 if __name__ == "__main__":
-    print(GameLogic.roll_dice(6))
+    welcome()
