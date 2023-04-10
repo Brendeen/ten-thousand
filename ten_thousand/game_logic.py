@@ -1,45 +1,79 @@
 import random
 
 
-def welcome():
-    print("""
-    Welcome to Ten Thousand
-    
-    (y)es to play or (q)uit to decline
-    """)
-    while True:
-        prompt = input("> ")
-        if prompt == "y":
-            game_round()
-            break
-        elif prompt == "q":
-            print("OK. Maybe another time")
-            break
-        else:
-            print(f"Sorry, {prompt} is not a valid answer, please type y or q.")
-
-
 def game_round():
-    round_num = 0
-    print(f"""Starting round {round_num}
-Rolling 6 dice...""")
-    print(GameLogic.roll_dice(6))
-    while True:
-        round_num += 1
-        print("Enter dice to keep, or (q)uit:")
-        prompt = input("> ")
-        if prompt == "123456":
-            calc_score()
-        elif prompt == "q":
-            print("Thanks for playing. You earned 0 points")
-            break
+    round_num = 1
+    banked_score = 0
+    kept_dice = []
+    dice_to_roll = 6
+    while dice_to_roll > 0:
+        new_dice = tuple(GameLogic.roll_dice(dice_to_roll))
+        roll = list(new_dice) + kept_dice
+        print(roll)
+        while True:
+            print("Enter dice to keep, or (q)uit:")
+            prompt = input("> ")
+            if prompt == "q":
+                print(f"Thanks for playing. You earned {banked_score} points")
+                return
+            parsed_input = parse_user_input(prompt)
+            print(parsed_input, new_dice, valid_user_input(parsed_input, new_dice))
+            if valid_user_input(parsed_input, new_dice):
+                break
+        dice_to_roll -= len(parsed_input)
+        kept_dice += parsed_input
+        unbanked = GameLogic.calculate_score(kept_dice)
+        while True:
+            print(f"""You have {unbanked} unbanked points and {dice_to_roll} dice remaining
+        (r)oll again, (b)ank your points or (q)uit:""")
+            prompt = input("> ")
+            if prompt == "r":
+                break
+            elif prompt == "b":
+                banked_score += unbanked
+                print(f"""You banked {banked_score} points in round {round_num}
+                Total score is {banked_score} points""")
+                round_num += 1
+                print(f"""Starting round {round_num}
+                Rolling 6 dice...""")
+                kept_dice = []
+                dice_to_roll = 6
+                break
+            elif prompt == "q":
+                print(f"Thanks for playing. You earned {banked_score} points")
+                return
 
 
-def calc_score(roll):
-    pass
-    print()
-# this function will calculate a users score if they
-# choose to bank any dice.
+def valid_user_input(user_input, new_dice):
+    """
+    Checks to see if user_input is valid
+    Example: "1 2 3 4 5 6"
+    :param user_input: Parsed user input []
+    :param new_dice: random.randint []
+    :return: True is user_input is valid, False is user_info is not valid
+    """
+    if not user_input:
+        return False
+    dice_lst = list(new_dice)
+    for i in user_input:
+        if len(dice_lst) < 1:
+            return False
+        if not (i in dice_lst):
+            return False
+        dice_lst.remove(i)
+    return True
+
+
+def parse_user_input(user_input):
+    """
+    Checks to see if user_input is an int value, and will
+    parse, return NULL is input is not an int in str data type
+    :param user_input: users input str""
+    :return: list of ints [] / return NULL is input is not an int in str data type
+    """
+    lst = user_input
+    lst_2 = [int(i) for i in lst]
+    return lst_2
 
 
 class GameLogic:
@@ -126,5 +160,24 @@ class GameLogic:
         # Lastly returning roll_sum with updated score
 
 
+def round_start():
+    print("""
+    Welcome to Ten Thousand
+
+    (y)es to play or (q)uit to decline
+    """)
+    while True:
+        prompt = input("> ")
+        if prompt == "y":
+            print("Starting round 1")
+            game_round()
+            return
+        elif prompt == "q":
+            print("OK. Maybe another time")
+            break
+        else:
+            print(f"Sorry, {prompt} is not a valid answer, please type y or q.")
+
+
 if __name__ == "__main__":
-    welcome()
+    round_start()
