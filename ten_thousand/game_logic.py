@@ -1,28 +1,37 @@
 import random
 
 
-def game_round():
-    round_num = 1
-    banked_score = 0
+def game_round(round_num, banked_score):
     kept_dice = []
     dice_to_roll = 6
+    unbanked_previous = 0
+
+    print(f"""Starting round {round_num}
+                    Rolling 6 dice...""")
+
     while dice_to_roll > 0:
         new_dice = tuple(GameLogic.roll_dice(dice_to_roll))
         roll = list(new_dice) + kept_dice
         print(roll)
+        unbanked = GameLogic.calculate_score(roll)
+
+        if unbanked == unbanked_previous:
+            print("Fiddlesticks!!!")
+            return banked_score, True
+
         while True:
             print("Enter dice to keep, or (q)uit:")
             prompt = input("> ")
             if prompt == "q":
-                print(f"Thanks for playing. You earned {banked_score} points")
-                return
+                return banked_score, False
+
             parsed_input = parse_user_input(prompt)
             # print(parsed_input, new_dice, valid_user_input(parsed_input, new_dice))
             if valid_user_input(parsed_input, new_dice):
                 break
         dice_to_roll -= len(parsed_input)
         kept_dice += parsed_input
-        unbanked = GameLogic.calculate_score(kept_dice)
+
         while True:
             print(f"""You have {unbanked} unbanked points and {dice_to_roll} dice remaining
 (r)oll again, (b)ank your points or (q)uit:""")
@@ -31,17 +40,11 @@ def game_round():
                 break
             elif prompt == "b":
                 banked_score += unbanked
-                print(f"""You banked {banked_score} points in round {round_num}
-Total score is {banked_score} points""")
-                round_num += 1
-                print(f"""Starting round {round_num}
-Rolling 6 dice...""")
-                kept_dice = []
-                dice_to_roll = 6
-                break
+                print(f"""You banked {unbanked} points in round {round_num}
+                Total score is {banked_score} points""")
+                return banked_score, True
             elif prompt == "q":
-                print(f"Thanks for playing. You earned {banked_score} points")
-                return
+                return banked_score, False
 
 
 def valid_user_input(user_input, new_dice):
@@ -160,6 +163,14 @@ class GameLogic:
         # Last part of function, searching for special dice scoring cases
         # Lastly returning roll_sum with updated score
 
+def hot_hand_check(roll):
+    full_hand = GameLogic.calculate_score(roll)
+    # TODO: Check if removing any element reduces roll score
+
+    return True
+
+
+
 
 def round_start():
     print("""
@@ -170,14 +181,23 @@ Welcome to Ten Thousand
     while True:
         prompt = input("> ")
         if prompt == "y":
-            print("Starting round 1")
-            game_round()
+            play_game()
             return
         elif prompt == "q":
             print("OK. Maybe another time")
-            break
+            return
         else:
             print(f"Sorry, {prompt} is not a valid answer, please type y or q.")
+
+def play_game():
+    banked_score = 0
+    round_num = 1
+    continue_game = True
+    while continue_game and round_num <= 20:
+        banked_score, continue_game = game_round(round_num, banked_score)
+        round_num += 1
+
+    print(f"Thanks for playing. You earned {banked_score} points")
 
 
 if __name__ == "__main__":
